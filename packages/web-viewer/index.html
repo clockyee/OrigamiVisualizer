@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Origami CP Visualizer</title>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path d="M5 8h30L21 35 5 8Z" fill="none" stroke="currentColor" stroke-width="1.8" />
+            <path d="M5 8l16 27M35 8 9 19m26-11-14 27M9 19l12 16" fill="none" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          <div>
+            <strong>Origami CP Visualizer</strong>
+            <span>CP-to-folding research workbench</span>
+          </div>
+        </div>
+        <div class="toolbar" role="toolbar" aria-label="Tools">
+          <button class="tool active" data-mode="viewer" title="Viewer mode">Viewer</button>
+          <button class="tool" data-mode="editor" title="Editor mode">Editor</button>
+          <button class="tool" data-tool="reset-view" title="Reset 3D view">Reset View</button>
+          <button class="tool" data-tool="export" title="Export current dataset sample">Export</button>
+          <label class="tool file-tool" title="Import a raster CP image">
+            Image CP
+            <input id="imageCpInput" type="file" accept="image/*" />
+          </label>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="panel cp-panel">
+          <div class="panel-tabs">
+            <button class="tab active" data-left-tab="cp">Crease Pattern</button>
+            <button class="tab" data-left-tab="graph">Graph</button>
+          </div>
+          <div class="tab-page active" data-left-page="cp">
+            <canvas id="cpCanvas" width="520" height="520" aria-label="2D crease pattern"></canvas>
+            <div class="legend">
+              <span><i class="boundary"></i>Boundary</span>
+              <span><i class="mountain"></i>Mountain</span>
+              <span><i class="valley"></i>Valley</span>
+              <span><i class="flat"></i>Flat / Unknown</span>
+            </div>
+            <div class="editor-controls">
+              <label for="assignmentSelect">New edge</label>
+              <select id="assignmentSelect">
+                <option value="V">Valley</option>
+                <option value="M">Mountain</option>
+                <option value="B">Boundary</option>
+                <option value="F">Flat</option>
+                <option value="U">Unknown</option>
+              </select>
+              <div class="editor-tools" role="toolbar" aria-label="Editor tools">
+                <button data-editor-tool="select" class="active">Select</button>
+                <button data-editor-tool="add-vertex">Add Vertex</button>
+                <button data-editor-tool="split-edge">Point on Edge</button>
+                <button data-editor-tool="add-edge">Add Edge</button>
+              </div>
+              <button id="deleteVertexButton">Delete selected vertex</button>
+              <button id="deleteEdgeButton">Delete selected edge</button>
+            </div>
+          </div>
+          <div class="tab-page graph-page" data-left-page="graph">
+            <div class="graph-summary" id="graphSummary"></div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Edge</th>
+                    <th>Vertices</th>
+                    <th>Assignment</th>
+                    <th>Faces</th>
+                  </tr>
+                </thead>
+                <tbody id="edgeTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <section class="check-card">
+            <div class="section-title">
+              <h2>CP Checks</h2>
+              <span id="warningCount">0</span>
+            </div>
+            <div id="checks" class="checks"></div>
+          </section>
+          <section class="stats">
+            <div><span id="statVertices">0</span><label>Vertices</label></div>
+            <div><span id="statEdges">0</span><label>Edges</label></div>
+            <div><span id="statFaces">0</span><label>Faces</label></div>
+          </section>
+        </aside>
+
+        <section class="viewer">
+          <div class="viewer-head">
+            <div>
+              <label for="exampleSelect">Example</label>
+              <select id="exampleSelect">
+                <option value="single">Single crease</option>
+                <option value="book">Book fold</option>
+                <option value="twoStep">Two-step edge fold</option>
+                <option value="multi">Multi-crease simultaneous</option>
+                <option value="blintz">Blintz base preview</option>
+                <option value="waterbomb">Waterbomb base constraint preview</option>
+                <option value="craneBase">Crane base draft</option>
+                <option value="rabbitEar">Rabbit ear rigid-panel preview</option>
+                <option value="miura">Miura-ori rigid-panel preview</option>
+                <option value="sink">Open sink fold preview</option>
+                <option value="broken">Broken FOLD check</option>
+              </select>
+            </div>
+            <div class="status">
+              <span class="dot"></span>
+              <span id="solverStatus">Ready</span>
+            </div>
+          </div>
+          <div id="foldViewport" aria-label="3D folded origami visualization"></div>
+          <div class="playback">
+            <label for="foldRange">Fold Progress</label>
+            <input id="foldRange" type="range" min="0" max="1" value="0.55" step="0.01" />
+            <output id="foldValue">0.55</output>
+            <button id="playButton" class="primary">Play</button>
+            <button id="resetButton">Reset</button>
+          </div>
+        </section>
+
+        <aside class="panel inspector">
+          <div class="panel-tabs">
+            <button class="tab active" data-right-tab="inspector">Inspector</button>
+            <button class="tab" data-right-tab="dataset">Dataset</button>
+          </div>
+          <div class="tab-page active" data-right-page="inspector">
+            <section>
+              <h2>Selected Pattern</h2>
+              <dl>
+                <dt>Name</dt>
+                <dd id="patternName">-</dd>
+                <dt>Solver</dt>
+                <dd id="solverType">-</dd>
+                <dt>Assignments</dt>
+                <dd id="assignmentSummary">-</dd>
+                <dt>Fold Target</dt>
+                <dd id="foldTarget">-</dd>
+                <dt>Guarantee</dt>
+                <dd id="solverGuarantee">-</dd>
+              </dl>
+            </section>
+            <section>
+              <h2>Editor Selection</h2>
+              <dl>
+                <dt>Edge</dt>
+                <dd id="selectedEdgeInfo">-</dd>
+                <dt>Vertices</dt>
+                <dd id="selectedVertexInfo">-</dd>
+                <dt>Adjacent Faces</dt>
+                <dd id="selectedFaceInfo">-</dd>
+                <dt>Lock</dt>
+                <dd id="selectedLockInfo">-</dd>
+              </dl>
+              <div class="assignment-buttons">
+                <button data-assignment="M">M</button>
+                <button data-assignment="V">V</button>
+                <button data-assignment="B">B</button>
+                <button data-assignment="F">F</button>
+                <button data-assignment="U">U</button>
+              </div>
+              <div class="edge-factor">
+                <label for="edgeFoldFactor">Selected fold factor</label>
+                <input id="edgeFoldFactor" type="range" min="0" max="1.5" value="1" step="0.01" />
+                <output id="edgeFoldFactorValue">1.00</output>
+              </div>
+              <button id="toggleLockButton" class="wide lock-button">Toggle selected edge lock</button>
+            </section>
+            <section>
+              <h2>Solver Metrics</h2>
+              <dl>
+                <dt>Max edge strain</dt>
+                <dd id="metricEdgeStrain">-</dd>
+                <dt>Max area error</dt>
+                <dd id="metricAreaError">-</dd>
+                <dt>Intersections</dt>
+                <dd id="metricIntersections">-</dd>
+                <dt>Layer/contact</dt>
+                <dd id="metricLayerWarning">-</dd>
+              </dl>
+            </section>
+            <section>
+              <h2>Problem Boundary</h2>
+              <p class="muted">
+                This prototype separates parsing, local foldability, global folded-state existence, collision-free path existence, and the current solver result.
+              </p>
+              <div class="truth-list" id="truthList"></div>
+            </section>
+          </div>
+          <div class="tab-page dataset-page" data-right-page="dataset">
+            <section>
+              <h2>Prediction Framing</h2>
+              <p class="muted">Each run is exportable as a supervised sample: CP graph in, solver trace and warnings out.</p>
+              <div class="task-list">
+                <span>Foldability classification</span>
+                <span>MV assignment completion</span>
+                <span>Final angle prediction</span>
+                <span>Trajectory prediction</span>
+              </div>
+            </section>
+            <section>
+              <h2>Export</h2>
+              <button id="exportButton" class="wide">Export dataset sample JSON</button>
+              <textarea id="exportText" spellcheck="false" aria-label="Exported summary"></textarea>
+            </section>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="statusbar">
+        <span>Format: FOLD JSON subset</span>
+        <span>Solver: rigid panels + preview relaxation</span>
+        <span>Backend: Three.js WebGL</span>
+      </footer>
+    </div>
+  </body>
+</html>

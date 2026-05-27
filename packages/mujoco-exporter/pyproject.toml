@@ -1,0 +1,8 @@
+[project]
+name = "origami-mujoco-exporter"
+version = "0.1.0"
+description = "Prototype FOLD-to-MJCF rigid-panel exporter for origami experiments."
+requires-python = ">=3.10"
+
+[project.scripts]
+origami-mjcf = "origami_mujoco.cli:main"

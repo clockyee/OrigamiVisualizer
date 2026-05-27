@@ -1,0 +1,11 @@
+{
+  "file_title": "Two-step edge fold",
+  "vertices_coords": [[0, 0], [1, 0], [1, 1], [0, 1], [0.42, 0], [0.42, 1], [0.72, 0], [0.72, 1]],
+  "edges_vertices": [[0, 4], [4, 6], [6, 1], [1, 2], [2, 7], [7, 5], [5, 3], [3, 0], [4, 5], [6, 7]],
+  "edges_assignment": ["B", "B", "B", "B", "B", "B", "B", "B", "V", "M"],
+  "faces_vertices": [[0, 4, 5, 3], [4, 6, 7, 5], [6, 1, 2, 7]],
+  "fold_steps": [
+    {"edge": 8, "angleDegrees": 180, "mode": "valley", "movingFaceSeed": 1, "start": 0, "end": 0.5},
+    {"edge": 9, "angleDegrees": 180, "mode": "mountain", "movingFaceSeed": 2, "start": 0.5, "end": 1}
+  ]
+}
