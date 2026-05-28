@@ -30,7 +30,7 @@ Borrowed references and project-specific innovation points are summarized in [do
 
 Implementation update: `packages/web-viewer` is now planned as a Vite + Three.js CP-to-folding workbench. The important research boundary is that arbitrary CP-to-correct-3D folding is not considered solved; the app should distinguish parse validity, local foldability, global folded-state existence, collision-free path existence, and the current solver result.
 
-Implementation update 2026-05-28: `packages/mujoco-exporter` now starts the MuJoCo route as a Python FOLD-to-MJCF prototype. It converts small rigid-panel examples into panel meshes, hinge joints over a face spanning tree, and a separate fold schedule JSON. This remains a scaffold for physical validation; closed-loop constraints, contact-rich replay, and robot manipulation are still next steps.
+Implementation update 2026-05-28: `packages/mujoco-exporter` now starts the MuJoCo route as a Python FOLD-to-MJCF prototype. It converts small rigid-panel examples into panel meshes, hinge joints over a face spanning tree, stable joint/actuator mappings, loop-closure debug metadata, and a separate fold schedule JSON. A first replay controller can drive actuator controls and log joint angles, target error, and contacts when MuJoCo Python is installed. Closed-loop equality constraints, richer contact replay, and robot manipulation are still next steps.
 
 ## Recommended Technical Route
 
